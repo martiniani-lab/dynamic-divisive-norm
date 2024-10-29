@@ -59,7 +59,7 @@ class rnnCell(nn.Module):
         # Define the semi-saturation constant
         # self.sigma = nn.Parameter(torch.randn((hidden_size)), requires_grad=True)
         self.sigma = nn.Parameter(sigma * torch.ones((hidden_size)), requires_grad=False)
-        self.B0_const = nn.Parameter(torch.ones((hidden_size)), requires_grad=False)
+        # self.B0_const = nn.Parameter(torch.ones((hidden_size)), requires_grad=False)
         self.n = n
 
         # Define the dimensionless time_step parameters

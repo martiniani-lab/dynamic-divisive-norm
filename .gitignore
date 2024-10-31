@@ -166,6 +166,7 @@ trained_models/
 .DS_Store
 **/*.pt
 **/*.svg
+**/*.sh
 batch_jobs/
 
 # ignore all files and folders within data/

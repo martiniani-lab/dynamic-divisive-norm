@@ -59,19 +59,19 @@ if __name__ == "__main__":
     }
 
     # Define model parameters
-    HIDDEN_SIZE = 128
-    PERMUTED = True
+    HIDDEN_SIZE = 64
+    PERMUTED = False
     CHECKPOINT = False
-    # dt_tau_max_y = 0.05
-    # dt_tau_max_a = 0.01
-    # dt_tau_max_b = 0.1
-    dt_tau_max_y = 0.02
-    dt_tau_max_a = 0.005
+    dt_tau_max_y = 0.05
+    dt_tau_max_a = 0.01
     dt_tau_max_b = 0.1
+    # dt_tau_max_y = 0.02
+    # dt_tau_max_a = 0.005
+    # dt_tau_max_b = 0.1
     LEARNING_RATE = 0.01
 
     # append_name = ""
-    append_name = "tau_fixed"
+    append_name = "rectified_input"
     
     
     if PERMUTED:
@@ -91,12 +91,12 @@ if __name__ == "__main__":
         "dt_tau_max_y": dt_tau_max_y,
         "dt_tau_max_a": dt_tau_max_a,
         "dt_tau_max_b": dt_tau_max_b,
-        "learn_tau": "False",
+        "learn_tau": "True",
         "HIDDEN_SIZE": HIDDEN_SIZE,
         "NUM_EPOCHS": 300,
         "LEARNING_RATE": LEARNING_RATE,
-        "SCHEDULER_CHANGE_STEP": 30,
-        "SCHEDULER_GAMMA": 0.8
+        "SCHEDULER_CHANGE_STEP": 50,
+        "SCHEDULER_GAMMA": 0.7
     }
 
     slurm_params["job_name"] = model_params["MODEL_NAME"]

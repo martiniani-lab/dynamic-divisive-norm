@@ -190,3 +190,5 @@ data/*
 **/tb_logs_test/
 **/tb_logs_pixel/
 **/tb_logs_05_13_24/
+
+**__pycache__

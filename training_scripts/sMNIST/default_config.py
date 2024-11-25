@@ -1,5 +1,5 @@
 MODEL_NAME = "sMNIST"
-FOLDER_NAME = "../../tb_logs"
+FOLDER_NAME = "/vast/sr6364/dynamic-divisive-norm/tb_logs"
 VERSION = 0
 PERMUTED = False
 SEED = 73

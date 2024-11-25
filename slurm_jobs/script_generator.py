@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # Define SLURM parameters
     slurm_params = {
         "nodes": 1,
-        "time": "15:00:00",
+        "time": "24:00:00",
         "ntasks_per_node": 1,
         "cpus_per_task": 8,
         "job_name": "sMNIST",
@@ -54,12 +54,12 @@ if __name__ == "__main__":
         "singularity_overlay": "/scratch/sr6364/overlay-files/overlay-50G-10M.ext3",
         "singularity_image": "/scratch/work/public/singularity/cuda11.8.86-cudnn8.7-devel-ubuntu22.04.2.sif",
         "conda_env": "feed-r-conda",
-        "script_dir": "/home/sr6364/python_scripts/organics-ml/examples/dynamical/sMNIST",
+        "script_dir": "/home/sr6364/python_scripts/dynamic-divisive-norm/training_scripts/sMNIST",
         "script_name": "train"
     }
 
     # Define model parameters
-    HIDDEN_SIZE = 64
+    HIDDEN_SIZE = 128
     PERMUTED = True
     CHECKPOINT = False
     # dt_tau_max_y = 0.05
@@ -76,10 +76,10 @@ if __name__ == "__main__":
     
     if PERMUTED:
         MODEL_NAME = f"psMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{append_name}"
-        FOLDER_NAME = "../../tb_logs/psMNIST"
+        FOLDER_NAME = f"/vast/sr6364/dynamic-divisive-norm/tb_logs/{append_name}/psMNIST"
     else:
         MODEL_NAME = f"sMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{append_name}"
-        FOLDER_NAME = "../../tb_logs/sMNIST"
+        FOLDER_NAME = f"/vast/sr6364/dynamic-divisive-norm/tb_logs/{append_name}/sMNIST"
 
     model_params = {
         "MODEL_NAME": MODEL_NAME,

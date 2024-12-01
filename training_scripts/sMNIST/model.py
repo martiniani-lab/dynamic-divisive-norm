@@ -26,8 +26,8 @@ class rnn(pl.LightningModule):
         # Initial hidden states for y and a neurons
         self.register_buffer("y0", torch.rand((hidden_size)))
         self.register_buffer("a0", torch.rand((hidden_size)))
-        # self.register_buffer("b00", torch.rand((hidden_size)))
-        self.register_buffer("b00", torch.ones((hidden_size)))
+        self.register_buffer("b00", torch.rand((hidden_size)))
+        # self.register_buffer("b00", torch.ones((hidden_size)))
         self.register_buffer("b10", torch.rand((hidden_size)))
         # self.register_buffer("x_max", torch.sqrt(torch.tensor([self.input_size])))
 
@@ -49,7 +49,7 @@ class rnn(pl.LightningModule):
         #         y, a, b0, b1 = self.org(x[:, i, :], y, a, b0, b1)
         for i in range(self.seq_length):
             y, a, b0, b1 = self.org(x[:, i, :], y, a, b0, b1)
-        # y = self.org.get_activation_y(y)
+        y = self.org.get_activation_y(y)
         # a = self.org.get_activation_a(a)
         # b = self.org.get_activation_a(b)
         return self.fc(y)
@@ -107,7 +107,8 @@ class rnn(pl.LightningModule):
         )
 
         # save the time series for the first batch
-        if batch_idx == 0:
+        if batch_idx == 2:
+            self.activations = defaultdict(list)
             x, _ = batch
             # x = x.reshape(x.size(0), self.seq_length, -1)
             x = self._transform_inputs(x)

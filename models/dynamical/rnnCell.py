@@ -114,7 +114,7 @@ class rnnCell(nn.Module):
         nn.init.kaiming_uniform_(self.Wzx(), a=math.sqrt(5))
         # make the spectral norm of Wzx() to be 1
         spectral_norm = torch.svd(self.Wzx()).S[0].item()
-        # print(spectral_norm)
+        # # print(spectral_norm)
         self.Wzx.weight.data = self.Wzx.weight.data / spectral_norm
         # spectral_norm = torch.svd(self.Wzx()).S[0].item()
         # print(spectral_norm)
@@ -182,6 +182,8 @@ class rnnCell(nn.Module):
         hidden: (batch_size, hidden_size)
         """
         z = F.relu(F.linear(x, self.Wzx(), bias=None))
+        # z = F.linear(x, self.Wzx(), bias=None)
+
         # Scale the norm of z
         # norm_z = torch.norm(z, dim=1, keepdim=True) + 1e-5
         # z = (z / norm_z) * (torch.norm(x, dim=1, keepdim=True) / math.sqrt(self.input_size))
@@ -189,10 +191,11 @@ class rnnCell(nn.Module):
         # z = torch.where(norm_z > 0.0, z / norm_z, z) * x 
         # print(torch.mean(torch.norm(z, dim=1)))
 
-        Wr = self.Wr()
+        Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
         # Wr = self.Wr()
 
-        y_hat = F.linear(F.relu(y), Wr, bias=None)
+        # y_hat = F.linear(F.relu(y), Wr, bias=None)
+        y_hat = F.relu(F.linear(y, Wr, bias=None))
 
         B0 = self.B0(x, y, a)
         # B0 = self.B0(z)

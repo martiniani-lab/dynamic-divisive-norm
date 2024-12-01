@@ -83,20 +83,21 @@ if __name__ == "__main__":
 
     # List of branches to generate scripts for
     branch_list = [
-        "fixed_tau",
-        "feature_model_variation1",
-        "feature_model_variation2"
+        "feature_diagonal_recurrence",
+        "feature_a_clamped"
     ]
+    # additional_name = "fixed_tau"
+    additional_name = ""
 
     for branch_name in branch_list:
         # Set append_name to branch_name, replacing slashes with underscores
-        append_name = branch_name.replace('/', '_')
+        append_name = branch_name
 
         if PERMUTED:
-            MODEL_NAME = f"psMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{append_name}"
+            MODEL_NAME = f"psMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{additional_name}"
             FOLDER_NAME = f"/vast/sr6364/dynamic-divisive-norm/tb_logs/{append_name}/psMNIST"
         else:
-            MODEL_NAME = f"sMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{append_name}"
+            MODEL_NAME = f"sMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{additional_name}"
             FOLDER_NAME = f"/vast/sr6364/dynamic-divisive-norm/tb_logs/{append_name}/sMNIST"
 
         model_params = {
@@ -109,7 +110,7 @@ if __name__ == "__main__":
             "dt_tau_max_y": dt_tau_max_y,
             "dt_tau_max_a": dt_tau_max_a,
             "dt_tau_max_b": dt_tau_max_b,
-            "learn_tau": "False",
+            "learn_tau": "True",
             "HIDDEN_SIZE": HIDDEN_SIZE,
             "NUM_EPOCHS": 300,
             "LEARNING_RATE": LEARNING_RATE,

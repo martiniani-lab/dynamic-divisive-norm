@@ -84,7 +84,8 @@ if __name__ == "__main__":
     # List of branches to generate scripts for
     branch_list = [
         "feature_diagonal_recurrence",
-        "feature_a_clamped"
+        "feature_a_clamped",
+        "feature_recurrence_rectified"
     ]
     # additional_name = "fixed_tau"
     additional_name = ""

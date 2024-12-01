@@ -85,7 +85,10 @@ if __name__ == "__main__":
     branch_list = [
         "feature_diagonal_recurrence",
         "feature_a_clamped",
-        "feature_recurrence_rectified"
+        "feature_recurrence_rectified",
+        "feature_Wr_identity",
+        "feature_Wr_identity_plus_ortho",
+        "feature_weight_norm",
     ]
     # additional_name = "rectified_model_fixed_tau"
     additional_name = "rectified_model"

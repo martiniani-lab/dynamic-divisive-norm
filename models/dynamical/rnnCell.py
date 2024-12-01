@@ -35,11 +35,9 @@ class rnnCell(nn.Module):
         # parametrize the spectral norm of the input drive to be maximum of 1
         # torch.nn.utils.parametrizations.spectral_norm(self.Wzx, name="weight")
 
-        self.Wr = utils.Identity(
-            nn.Parameter(torch.eye(hidden_size), requires_grad=not Wr_identity)
+        self.Wr_weight = nn.Parameter(
+            torch.ones((hidden_size)), requires_grad=not Wr_identity
         )
-        # parameterize Wr to have a max singular value of 1
-        # torch.nn.utils.parametrizations.spectral_norm(self.Wr, name="weight")
         
         # Define the weight matrices for the gains
         self.Wbx0 = nn.Parameter(torch.randn((hidden_size, input_size)), requires_grad=True)
@@ -117,13 +115,6 @@ class rnnCell(nn.Module):
         # # print(spectral_norm)
         self.Wzx.weight.data = self.Wzx.weight.data / spectral_norm
         # spectral_norm = torch.svd(self.Wzx()).S[0].item()
-        # print(spectral_norm)
-
-        # make orthogonal initialization for Wr
-        if self.Wr_identity:
-            self.Wr.weight.data = torch.eye(self.hidden_size)
-        else:
-            nn.init.orthogonal_(self.Wr(), gain=1.0)
 
         # nn.init.kaiming_uniform_(self.Wr.weight, a=math.sqrt(5))
         nn.init.kaiming_uniform_(self.Wbx0, a=math.sqrt(5))
@@ -143,6 +134,9 @@ class rnnCell(nn.Module):
     def Way(self):
         # return torch.clamp(self.log_Way.exp(), min=0.0, max=1.0)
         return self.log_Way.exp()
+    
+    def Wr(self):
+        return torch.diag(self.Wr_weight)
 
     def B0(self, x, y, a):
         return torch.sigmoid(F.linear(x, self.Wbx0, bias=None) + F.linear(y, self.Wby0, bias=None) + F.linear(a, self.Wba0, bias=None))
@@ -191,8 +185,7 @@ class rnnCell(nn.Module):
         # z = torch.where(norm_z > 0.0, z / norm_z, z) * x 
         # print(torch.mean(torch.norm(z, dim=1)))
 
-        Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
-        # Wr = self.Wr()
+        Wr = self.Wr()
 
         # y_hat = F.linear(F.relu(y), Wr, bias=None)
         y_hat = F.relu(F.linear(y, Wr, bias=None))

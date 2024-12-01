@@ -11,7 +11,7 @@ class rnnCell(nn.Module):
         self,
         input_size: int,
         hidden_size: int,
-        Wr_identity=False,
+        Wr_identity=True,
         learn_tau=True,
         dt_tau_max_y=0.01,
         dt_tau_max_a=0.01,
@@ -36,7 +36,7 @@ class rnnCell(nn.Module):
         # torch.nn.utils.parametrizations.spectral_norm(self.Wzx, name="weight")
 
         self.Wr = utils.Identity(
-            nn.Parameter(torch.eye(hidden_size), requires_grad=not Wr_identity)
+            nn.Parameter(torch.eye(hidden_size), requires_grad=False)
         )
         # parameterize Wr to have a max singular value of 1
         # torch.nn.utils.parametrizations.spectral_norm(self.Wr, name="weight")
@@ -117,13 +117,6 @@ class rnnCell(nn.Module):
         # # print(spectral_norm)
         self.Wzx.weight.data = self.Wzx.weight.data / spectral_norm
         # spectral_norm = torch.svd(self.Wzx()).S[0].item()
-        # print(spectral_norm)
-
-        # make orthogonal initialization for Wr
-        if self.Wr_identity:
-            self.Wr.weight.data = torch.eye(self.hidden_size)
-        else:
-            nn.init.orthogonal_(self.Wr(), gain=1.0)
 
         # nn.init.kaiming_uniform_(self.Wr.weight, a=math.sqrt(5))
         nn.init.kaiming_uniform_(self.Wbx0, a=math.sqrt(5))
@@ -191,8 +184,7 @@ class rnnCell(nn.Module):
         # z = torch.where(norm_z > 0.0, z / norm_z, z) * x 
         # print(torch.mean(torch.norm(z, dim=1)))
 
-        Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
-        # Wr = self.Wr()
+        Wr = self.Wr()
 
         # y_hat = F.linear(F.relu(y), Wr, bias=None)
         y_hat = F.relu(F.linear(y, Wr, bias=None))

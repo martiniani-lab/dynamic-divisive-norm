@@ -182,7 +182,8 @@ data/*
 **/*.csv
 **/*.gz
 **/*ubyte
-*.out
+**/*.out
+**/*.txt
 **/tb_logs/
 **/tb_logs_old/
 **/tb_logs_old_old/

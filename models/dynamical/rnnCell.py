@@ -194,8 +194,8 @@ class rnnCell(nn.Module):
         # Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
         Wr = self.Wr()
 
-        y_hat = F.linear(F.relu(y), Wr, bias=None)
-        # y_hat = F.relu(F.linear(y, Wr, bias=None))
+        # y_hat = F.linear(F.relu(y), Wr, bias=None)
+        y_hat = F.relu(F.linear(y, Wr, bias=None))
 
         B0 = self.B0(x, y, a)
         # B0 = self.B0(z)

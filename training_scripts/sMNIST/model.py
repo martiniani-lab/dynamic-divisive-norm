@@ -49,7 +49,7 @@ class rnn(pl.LightningModule):
         #         y, a, b0, b1 = self.org(x[:, i, :], y, a, b0, b1)
         for i in range(self.seq_length):
             y, a, b0, b1 = self.org(x[:, i, :], y, a, b0, b1)
-        y = self.org.get_activation_y(y)
+        # y = self.org.get_activation_y(y)
         # a = self.org.get_activation_a(a)
         # b = self.org.get_activation_a(b)
         return self.fc(y)

@@ -39,7 +39,7 @@ class rnnCell(nn.Module):
             nn.Parameter(torch.eye(hidden_size), requires_grad=not Wr_identity)
         )
         # parameterize Wr to have a max singular value of 1
-        # torch.nn.utils.parametrizations.spectral_norm(self.Wr, name="weight")
+        torch.nn.utils.parametrizations.spectral_norm(self.Wr, name="weight")
         
         # Define the weight matrices for the gains
         self.Wbx0 = nn.Parameter(torch.randn((hidden_size, input_size)), requires_grad=True)
@@ -191,8 +191,8 @@ class rnnCell(nn.Module):
         # z = torch.where(norm_z > 0.0, z / norm_z, z) * x 
         # print(torch.mean(torch.norm(z, dim=1)))
 
-        # Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
-        Wr = self.Wr()
+        Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
+        # Wr = self.Wr()
 
         # y_hat = F.linear(F.relu(y), Wr, bias=None)
         y_hat = F.relu(F.linear(y, Wr, bias=None))

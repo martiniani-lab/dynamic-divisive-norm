@@ -84,8 +84,8 @@ if __name__ == "__main__":
     # List of branches to generate scripts for
     branch_list = [
         "fixed_tau",
-        "feature/model_variation1",
-        "feature/model_variation2"
+        "feature_model_variation1",
+        "feature_model_variation2"
     ]
 
     for branch_name in branch_list:

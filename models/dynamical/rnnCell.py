@@ -191,8 +191,8 @@ class rnnCell(nn.Module):
         # z = torch.where(norm_z > 0.0, z / norm_z, z) * x 
         # print(torch.mean(torch.norm(z, dim=1)))
 
-        Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
-        # Wr = self.Wr()
+        # Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
+        Wr = self.Wr()
 
         # y_hat = F.linear(F.relu(y), Wr, bias=None)
         y_hat = F.relu(F.linear(y, Wr, bias=None))

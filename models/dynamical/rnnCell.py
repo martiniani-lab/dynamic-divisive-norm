@@ -191,11 +191,11 @@ class rnnCell(nn.Module):
         # z = torch.where(norm_z > 0.0, z / norm_z, z) * x 
         # print(torch.mean(torch.norm(z, dim=1)))
 
-        Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
-        # Wr = self.Wr()
+        # Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
+        Wr = self.Wr()
 
-        # y_hat = F.linear(F.relu(y), Wr, bias=None)
-        y_hat = F.relu(F.linear(y, Wr, bias=None))
+        y_hat = F.linear(F.relu(y), Wr, bias=None)
+        # y_hat = F.relu(F.linear(y, Wr, bias=None))
 
         B0 = self.B0(x, y, a)
         # B0 = self.B0(z)
@@ -208,7 +208,7 @@ class rnnCell(nn.Module):
         # Integrate the diff. equation by one step and find the activations
         b_new0 = b0 + self.dt_taub0() * (-b0 + B0)
         b_new1 = b1 + self.dt_taub1() * (-b1 + B1)
-        y_new = y + self.dt_tauy() * (-y + b1 * z + (1 - self.get_activation_a(a)) * y_hat)
+        y_new = y + self.dt_tauy() * (-y + b1 * z + torch.clamp(1 - self.get_activation_a(a), min=0.0, max=1.0) * y_hat)
         a_new = a + self.dt_taua() * (
             - a
             + self.sigma ** 2 * b0 ** 2

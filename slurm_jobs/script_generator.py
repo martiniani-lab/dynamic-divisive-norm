@@ -87,8 +87,8 @@ if __name__ == "__main__":
         "feature_a_clamped",
         "feature_recurrence_rectified"
     ]
-    # additional_name = "fixed_tau"
-    additional_name = ""
+    # additional_name = "rectified_model_fixed_tau"
+    additional_name = "rectified_model"
 
     for branch_name in branch_list:
         # Set append_name to branch_name, replacing slashes with underscores

@@ -181,6 +181,7 @@ data/*
 **/*.npy
 **/*.csv
 **/*.gz
+**/*.txt
 **/*ubyte
 *.out
 **/tb_logs/

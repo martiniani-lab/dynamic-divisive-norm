@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     # Define model parameters
     HIDDEN_SIZE = 128
-    PERMUTED = True
+    PERMUTED = False
     CHECKPOINT = False
     dt_tau_max_y = 0.05
     dt_tau_max_a = 0.01
@@ -85,7 +85,10 @@ if __name__ == "__main__":
     # branch_list = [
     #     "feature_diagonal_recurrence",
     #     "feature_a_clamped",
-    #     "feature_recurrence_rectified"
+    #     "feature_recurrence_rectified",
+    #     "feature_Wr_identity",
+    #     "feature_Wr_identity_plus_ortho",
+    #     "feature_weight_norm",
     # ]
     branch_list = [
         "feature_diagonal_recurrence",

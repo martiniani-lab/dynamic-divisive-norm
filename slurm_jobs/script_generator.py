@@ -21,13 +21,26 @@ def generate_slurm_script(slurm_params, model_params, branch_name=None):
     else:
         script_content += f'\nBRANCH_NAME=main\n'  # Default to 'main' if not specified
 
+    # Add commands to clone the repository into a unique working directory
     script_content += f'''
+# Create a unique working directory for this job
+WORK_DIR="/scratch/sr6364/jobs/job_$SLURM_JOB_ID"
+mkdir -p "$WORK_DIR"
+
+# Clone the repository into the working directory
+git clone {slurm_params['repo_dir']} "$WORK_DIR/dynamic-divisive-norm"
+
+# Navigate to the cloned repository
+cd "$WORK_DIR/dynamic-divisive-norm"
+
+# Check out the desired branch and reset to match the remote branch
+git fetch origin
+git checkout $BRANCH_NAME
+git reset --hard origin/$BRANCH_NAME
+
+# Execute the training script
 singularity exec --nv --overlay {slurm_params['singularity_overlay']}:ro {slurm_params['singularity_image']} /bin/bash -c "
 source /ext3/env.sh; conda activate {slurm_params['conda_env']}; \
-cd {slurm_params['repo_dir']}; \
-git fetch origin; \
-git checkout $BRANCH_NAME; \
-git pull; \
 cd {slurm_params['script_subdir']}; \
 python {slurm_params['script_name']}.py \
 '''
@@ -81,7 +94,7 @@ if __name__ == "__main__":
     dt_tau_max_b = 0.1
     LEARNING_RATE = 0.01
 
-    # List of branches to generate scripts for
+    ## List of branches to generate scripts for
     # branch_list = [
     #     "feature_diagonal_recurrence",
     #     "feature_a_clamped",
@@ -91,17 +104,18 @@ if __name__ == "__main__":
     #     "feature_weight_norm",
     #     "feature_recurrence_rectified_identity_perturbed",
     # ]
+
     branch_list = [
         "feature_diagonal_recurrence",
         "feature_recurrence_rectified",
         "feature_recurrence_rectified_identity_perturbed",
     ]
-    # additional_name = "rectified_model_fixed_tau"
     additional_name = "rectified_model"
+    # additional_name = "rectified_model_fixed_tau"
 
     for branch_name in branch_list:
         # Set append_name to branch_name, replacing slashes with underscores
-        append_name = branch_name
+        append_name = branch_name.replace("/", "_")
 
         if PERMUTED:
             MODEL_NAME = f"psMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{additional_name}"

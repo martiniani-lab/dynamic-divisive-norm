@@ -82,13 +82,22 @@ if __name__ == "__main__":
     LEARNING_RATE = 0.01
 
     # List of branches to generate scripts for
+    # branch_list = [
+    #     "feature_diagonal_recurrence",
+    #     "feature_a_clamped",
+    #     "feature_recurrence_rectified",
+    #     "feature_Wr_identity",
+    #     "feature_Wr_identity_plus_ortho",
+    #     "feature_weight_norm",
+    #     "feature_recurrence_rectified_identity_perturbed",
+    # ]
     branch_list = [
         "feature_diagonal_recurrence",
-        "feature_a_clamped",
-        "feature_recurrence_rectified"
+        "feature_recurrence_rectified",
+        "feature_recurrence_rectified_identity_perturbed",
     ]
-    # additional_name = "fixed_tau"
-    additional_name = ""
+    # additional_name = "rectified_model_fixed_tau"
+    additional_name = "rectified_model"
 
     for branch_name in branch_list:
         # Set append_name to branch_name, replacing slashes with underscores

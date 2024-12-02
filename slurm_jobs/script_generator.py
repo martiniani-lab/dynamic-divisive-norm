@@ -127,6 +127,7 @@ if __name__ == "__main__":
         model_params = {
             "MODEL_NAME": MODEL_NAME,
             "FOLDER_NAME": FOLDER_NAME,
+            "DATA_DIR": "/home/sr6364/python_scripts/dynamic-divisive-norm/data/mnist",
             "PERMUTED": PERMUTED,
             "CHECKPOINT": CHECKPOINT,
             "VERSION": 0,

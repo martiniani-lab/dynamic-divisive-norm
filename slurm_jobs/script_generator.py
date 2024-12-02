@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     # Define model parameters
     HIDDEN_SIZE = 128
-    PERMUTED = False
+    PERMUTED = True
     CHECKPOINT = False
     dt_tau_max_y = 0.05
     dt_tau_max_a = 0.01
@@ -82,21 +82,13 @@ if __name__ == "__main__":
     LEARNING_RATE = 0.01
 
     # List of branches to generate scripts for
-    # branch_list = [
-    #     "feature_diagonal_recurrence",
-    #     "feature_a_clamped",
-    #     "feature_recurrence_rectified",
-    #     "feature_Wr_identity",
-    #     "feature_Wr_identity_plus_ortho",
-    #     "feature_weight_norm",
-    # ]
     branch_list = [
         "feature_diagonal_recurrence",
-        "feature_recurrence_rectified",
-        "feature_recurrence_rectified_identity_perturbed"
+        "feature_a_clamped",
+        "feature_recurrence_rectified"
     ]
-    # additional_name = "rectified_model_fixed_tau"
-    additional_name = "rectified_model"
+    # additional_name = "fixed_tau"
+    additional_name = ""
 
     for branch_name in branch_list:
         # Set append_name to branch_name, replacing slashes with underscores
@@ -132,14 +124,14 @@ if __name__ == "__main__":
         script_content = generate_slurm_script(slurm_params, model_params, branch_name=branch_name)
         if PERMUTED:
             # Replace slashes with underscores for directory names
-            directory = f'psMNIST_{HIDDEN_SIZE}_{append_name}'
+            directory = f'psMNIST_{HIDDEN_SIZE}/{append_name}'
             if not os.path.exists(directory):
                 os.makedirs(directory)
             # Use the MODEL_NAME as the script file name
             file_path = os.path.join(directory, f'{MODEL_NAME}.sh')
             save_script(script_content, file_path)
         else:
-            directory = f'sMNIST_{HIDDEN_SIZE}_{append_name}'
+            directory = f'sMNIST_{HIDDEN_SIZE}/{append_name}'
             if not os.path.exists(directory):
                 os.makedirs(directory)
             file_path = os.path.join(directory, f'{MODEL_NAME}.sh')

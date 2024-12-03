@@ -48,11 +48,11 @@ class rnnCell(nn.Module):
         self.Wby1 = nn.Parameter(torch.randn((hidden_size, hidden_size)))
         self.Wba1 = nn.Parameter(torch.randn((hidden_size, hidden_size)))
 
-        self.initilize_weights()
-
         # Define the normalization matrix
         self.log_Way = nn.Parameter(torch.zeros((hidden_size, hidden_size)))
-        self.initilize_norm_matrix()
+        self.sparsity = 0.5
+
+        self.initilize_weights()
 
         # Define the semi-saturation constant
         # self.sigma = nn.Parameter(torch.randn((hidden_size)), requires_grad=True)
@@ -124,19 +124,22 @@ class rnnCell(nn.Module):
         nn.init.kaiming_uniform_(self.Wbx1, a=math.sqrt(5))
         nn.init.kaiming_uniform_(self.Wby1, a=math.sqrt(5))
         nn.init.kaiming_uniform_(self.Wba1, a=math.sqrt(5))
-        return
-
-    def initilize_norm_matrix(self):
-        self.log_Way.data.uniform_(-1.0, 0.0)
+        
+        # initialize the Way matrix
+        mask = torch.rand((self.hidden_size, self.hidden_size)) > self.sparsity
+        uniform_values = torch.empty((self.hidden_size, self.hidden_size)).uniform_(0.0, 1.0)
+        sparse_values = uniform_values * mask.float()
+        log_sparse_values = torch.log(torch.clamp(sparse_values, min=1e-8))
+        self.log_Way.data.copy_(log_sparse_values)
         self.log_Way.data.fill_diagonal_(0.0)
         return
 
     def Way(self):
-        # return torch.clamp(self.log_Way.exp(), min=0.0, max=1.0)
-        return self.log_Way.exp()
+        return torch.clamp(self.log_Way.exp(), min=0.0, max=1.0)
+        # return self.log_Way.exp()
     
     def Wr(self):
-        return torch.diag(self.Wr_weight)
+        return torch.diag(torch.sigmoid(self.Wr_weight))
 
     def B0(self, x, y, a):
         return torch.sigmoid(F.linear(x, self.Wbx0, bias=None) + F.linear(y, self.Wby0, bias=None) + F.linear(a, self.Wba0, bias=None))

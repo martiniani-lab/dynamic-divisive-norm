@@ -7,6 +7,12 @@ This repository contains code associated with our 2024 NeurIPS paper.
 <img src="./figures/github_image.svg" alt="Description" width="800px">
 </div>
 
+## Project Website
+
+For more details, visit the project website:  
+[https://shivangrawat.github.io/dynamic-divisive-norm/](https://shivangrawat.github.io/dynamic-divisive-norm/)
+
+
 ## Installation
 
 Follow these steps:

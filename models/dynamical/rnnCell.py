@@ -39,7 +39,7 @@ class rnnCell(nn.Module):
             nn.Parameter(torch.eye(hidden_size), requires_grad=not Wr_identity)
         )
         # parameterize Wr to have a max singular value of 1
-        torch.nn.utils.parametrizations.spectral_norm(self.Wr, name="weight")
+        # torch.nn.utils.parametrizations.spectral_norm(self.Wr, name="weight")
         
         # Define the weight matrices for the gains
         self.Wbx0 = nn.Parameter(torch.randn((hidden_size, input_size)), requires_grad=True)
@@ -50,11 +50,11 @@ class rnnCell(nn.Module):
         self.Wby1 = nn.Parameter(torch.randn((hidden_size, hidden_size)))
         self.Wba1 = nn.Parameter(torch.randn((hidden_size, hidden_size)))
 
-        self.initilize_weights()
-
         # Define the normalization matrix
         self.log_Way = nn.Parameter(torch.zeros((hidden_size, hidden_size)))
-        self.initilize_norm_matrix()
+
+        # Initialize the weights
+        self.initilize_weights()
 
         # Define the semi-saturation constant
         # self.sigma = nn.Parameter(torch.randn((hidden_size)), requires_grad=True)
@@ -133,9 +133,8 @@ class rnnCell(nn.Module):
         nn.init.kaiming_uniform_(self.Wbx1, a=math.sqrt(5))
         nn.init.kaiming_uniform_(self.Wby1, a=math.sqrt(5))
         nn.init.kaiming_uniform_(self.Wba1, a=math.sqrt(5))
-        return
 
-    def initilize_norm_matrix(self):
+        # initialize the normalization matrix
         self.log_Way.data.uniform_(-1.0, 0.0)
         self.log_Way.data.fill_diagonal_(0.0)
         return
@@ -181,7 +180,7 @@ class rnnCell(nn.Module):
         x: (batch_size, input_size)
         hidden: (batch_size, hidden_size)
         """
-        z = F.linear(x, self.Wzx(), bias=None)
+        z = F.relu(F.linear(x, self.Wzx(), bias=None))
         # Scale the norm of z
         # norm_z = torch.norm(z, dim=1, keepdim=True) + 1e-5
         # z = (z / norm_z) * (torch.norm(x, dim=1, keepdim=True) / math.sqrt(self.input_size))
@@ -189,10 +188,10 @@ class rnnCell(nn.Module):
         # z = torch.where(norm_z > 0.0, z / norm_z, z) * x 
         # print(torch.mean(torch.norm(z, dim=1)))
 
-        Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
-        # Wr = self.Wr()
+        # Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
+        Wr = self.Wr()
 
-        y_hat = F.linear(F.relu(y), Wr, bias=None)
+        y_hat = F.relu(F.linear(y, Wr, bias=None))
 
         B0 = self.B0(x, y, a)
         # B0 = self.B0(z)

@@ -178,6 +178,7 @@ data/*
 **/*.jpeg
 **/*.gif
 **/*.tif
+**/*.txt
 **/*.npy
 **/*.csv
 **/*.gz

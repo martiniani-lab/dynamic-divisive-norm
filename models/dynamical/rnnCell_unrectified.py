@@ -35,30 +35,29 @@ class rnnCell_unrectified(nn.Module):
         # parametrize the spectral norm of the input drive to be maximum of 1
         # torch.nn.utils.parametrizations.spectral_norm(self.Wzx, name="weight")
 
-        self.Wr = utils.Identity(
-            nn.Parameter(torch.eye(hidden_size), requires_grad=not Wr_identity)
+        self.Wr_weight = nn.Parameter(
+            torch.ones((hidden_size)), requires_grad=not Wr_identity
         )
-        # parameterize Wr to have a max singular value of 1
-        # torch.nn.utils.parametrizations.spectral_norm(self.Wr, name="weight")
         
         # Define the weight matrices for the gains
-        self.Wbx0 = nn.Parameter(torch.randn((hidden_size, input_size)))
-        self.Wby0 = nn.Parameter(torch.randn((hidden_size, hidden_size)))
-        self.Wba0 = nn.Parameter(torch.randn((hidden_size, hidden_size)))
+        self.Wbx0 = nn.Parameter(torch.randn((hidden_size, input_size)), requires_grad=True)
+        self.Wby0 = nn.Parameter(torch.randn((hidden_size, hidden_size)), requires_grad=True)
+        self.Wba0 = nn.Parameter(torch.randn((hidden_size, hidden_size)), requires_grad=True)
 
         self.Wbx1 = nn.Parameter(torch.randn((hidden_size, input_size)))
         self.Wby1 = nn.Parameter(torch.randn((hidden_size, hidden_size)))
         self.Wba1 = nn.Parameter(torch.randn((hidden_size, hidden_size)))
 
-        self.initilize_weights()
-
         # Define the normalization matrix
         self.log_Way = nn.Parameter(torch.zeros((hidden_size, hidden_size)))
-        self.initilize_norm_matrix()
+        self.sparsity = 0.0
+
+        self.initilize_weights()
 
         # Define the semi-saturation constant
         # self.sigma = nn.Parameter(torch.randn((hidden_size)), requires_grad=True)
         self.sigma = nn.Parameter(sigma * torch.ones((hidden_size)), requires_grad=False)
+        # self.B0_const = nn.Parameter(torch.ones((hidden_size)), requires_grad=False)
         self.n = n
 
         # Define the dimensionless time_step parameters
@@ -68,32 +67,32 @@ class rnnCell_unrectified(nn.Module):
         self.beta = 5.0
 
         # Define the time constant parameters
-        self.param_dt_tauy = nn.Parameter(
-            torch.randn((hidden_size)), requires_grad=learn_tau
-        )
-        self.param_dt_taua = nn.Parameter(
-            torch.randn((hidden_size)), requires_grad=learn_tau
-        )
-        self.param_dt_taub0 = nn.Parameter(
-            torch.randn((hidden_size)), requires_grad=learn_tau
-        )
-        self.param_dt_taub1 = nn.Parameter(
-            torch.randn((hidden_size)), requires_grad=learn_tau
-        )
-
-        # # for equal time constant initialization
-        # self.param_dt_tauy = nn.Parameter(
-        #     torch.ones((hidden_size)), requires_grad=learn_tau
-        # )
-        # self.param_dt_taua = nn.Parameter(
-        #     torch.ones((hidden_size)), requires_grad=learn_tau
-        # )
-        # self.param_dt_taub0 = nn.Parameter(
-        #     torch.ones((hidden_size)), requires_grad=learn_tau
-        # )
-        # self.param_dt_taub1 = nn.Parameter(
-        #     torch.ones((hidden_size)), requires_grad=learn_tau
-        # )
+        if self.learn_tau:
+            self.param_dt_tauy = nn.Parameter(
+                torch.randn((hidden_size)), requires_grad=learn_tau
+            )
+            self.param_dt_taua = nn.Parameter(
+                torch.randn((hidden_size)), requires_grad=learn_tau
+            )
+            self.param_dt_taub0 = nn.Parameter(
+                torch.randn((hidden_size)), requires_grad=learn_tau
+            )
+            self.param_dt_taub1 = nn.Parameter(
+                torch.randn((hidden_size)), requires_grad=learn_tau
+            )
+        else:
+            self.param_dt_tauy = nn.Parameter(
+                torch.ones((hidden_size)), requires_grad=learn_tau
+            )
+            self.param_dt_taua = nn.Parameter(
+                torch.ones((hidden_size)), requires_grad=learn_tau
+            )
+            self.param_dt_taub0 = nn.Parameter(
+                torch.ones((hidden_size)), requires_grad=learn_tau
+            )
+            self.param_dt_taub1 = nn.Parameter(
+                torch.ones((hidden_size)), requires_grad=learn_tau
+            )
 
         # define a small value to prevent division by zero in norm_eqn and sqrt backprop
         self.eps = 1e-8
@@ -111,6 +110,12 @@ class rnnCell_unrectified(nn.Module):
 
     def initilize_weights(self):
         nn.init.kaiming_uniform_(self.Wzx(), a=math.sqrt(5))
+        # make the spectral norm of Wzx() to be 1
+        spectral_norm = torch.svd(self.Wzx()).S[0].item()
+        # # print(spectral_norm)
+        self.Wzx.weight.data = self.Wzx.weight.data / spectral_norm
+        # spectral_norm = torch.svd(self.Wzx()).S[0].item()
+
         # nn.init.kaiming_uniform_(self.Wr.weight, a=math.sqrt(5))
         nn.init.kaiming_uniform_(self.Wbx0, a=math.sqrt(5))
         nn.init.kaiming_uniform_(self.Wby0, a=math.sqrt(5))
@@ -119,25 +124,32 @@ class rnnCell_unrectified(nn.Module):
         nn.init.kaiming_uniform_(self.Wbx1, a=math.sqrt(5))
         nn.init.kaiming_uniform_(self.Wby1, a=math.sqrt(5))
         nn.init.kaiming_uniform_(self.Wba1, a=math.sqrt(5))
-        return
-
-    def initilize_norm_matrix(self):
-        self.log_Way.data.uniform_(-1.0, 0.0)
+        
+        # initialize the Way matrix
+        mask = torch.rand((self.hidden_size, self.hidden_size)) > self.sparsity
+        uniform_values = torch.empty((self.hidden_size, self.hidden_size)).uniform_(0.0, 1.0)
+        sparse_values = uniform_values * mask.float()
+        log_sparse_values = torch.log(torch.clamp(sparse_values, min=1e-8))
+        self.log_Way.data.copy_(log_sparse_values)
         self.log_Way.data.fill_diagonal_(0.0)
         return
 
     def Way(self):
-        # return torch.clamp(self.log_Way.exp(), min=0.0, max=1.0)
-        return self.log_Way.exp()
+        return torch.clamp(self.log_Way.exp(), min=0.0, max=1.0)
+        # return self.log_Way.exp()
+    
+    def Wr(self):
+        return torch.diag(torch.sigmoid(self.Wr_weight))
 
-    # def B0(self, x, y, a):
-    #     return torch.sigmoid(F.linear(x, self.Wbx0, bias=None) + F.linear(y, self.Wby0, bias=None) + F.linear(a, self.Wba0, bias=None))
+    def B0(self, x, y, a):
+        return torch.sigmoid(F.linear(x, self.Wbx0, bias=None) + F.linear(y, self.Wby0, bias=None) + F.linear(a, self.Wba0, bias=None))
 
-    def B0(self, z):
-        return torch.sigmoid(1 / (torch.norm(z, dim=-1, keepdim=True) + self.eps))
-
+    # def B0(self, z):
+    #     return torch.sigmoid(1 / (torch.norm(z, dim=-1, keepdim=True) + self.eps))
+    
     def B1(self, x, y, a):
         return torch.sigmoid(F.linear(x, self.Wbx1, bias=None) + F.linear(y, self.Wby1, bias=None) + F.linear(a, self.Wba1, bias=None))
+        # return torch.sigmoid(F.linear(x, self.Wbx1, bias=None))
 
     @staticmethod
     def tau_func(param, tau_max, beta):
@@ -166,7 +178,9 @@ class rnnCell_unrectified(nn.Module):
         x: (batch_size, input_size)
         hidden: (batch_size, hidden_size)
         """
+        # z = F.relu(F.linear(x, self.Wzx(), bias=None))
         z = F.linear(x, self.Wzx(), bias=None)
+
         # Scale the norm of z
         # norm_z = torch.norm(z, dim=1, keepdim=True) + 1e-5
         # z = (z / norm_z) * (torch.norm(x, dim=1, keepdim=True) / math.sqrt(self.input_size))
@@ -174,10 +188,12 @@ class rnnCell_unrectified(nn.Module):
         # z = torch.where(norm_z > 0.0, z / norm_z, z) * x 
         # print(torch.mean(torch.norm(z, dim=1)))
 
-        y_hat = F.linear(y, self.Wr(), bias=None)
+        Wr = self.Wr()
+        y_hat = F.linear(y, Wr, bias=None)
 
-        # B0 = self.B0(x, y, a)
-        B0 = self.B0(z)
+        B0 = self.B0(x, y, a)
+        # B0 = self.B0(z)
+        # B0 = self.B0_const
         B1 = self.B1(x, y, a)
 
         # Update the input gain loss

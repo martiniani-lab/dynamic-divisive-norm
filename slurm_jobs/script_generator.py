@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # Define SLURM parameters
     slurm_params = {
         "nodes": 1,
-        "time": "18:00:00",
+        "time": "24:00:00",
         "ntasks_per_node": 1,
         "cpus_per_task": 8,
         "job_name": "sMNIST",
@@ -86,32 +86,24 @@ if __name__ == "__main__":
     }
 
     # Define model parameters
-    HIDDEN_SIZE = 64
+    HIDDEN_SIZE = 128
     PERMUTED = True
     CHECKPOINT = False
     dt_tau_max_y = 0.05
     dt_tau_max_a = 0.01
     dt_tau_max_b = 0.1
-    LEARNING_RATE = 0.001
+    LEARNING_RATE = 0.005
 
-    ## List of branches to generate scripts for
-    # branch_list = [
-    #     "feature_diagonal_recurrence",
-    #     "feature_a_clamped",
-    #     "feature_recurrence_rectified",
-    #     "feature_Wr_identity",
-    #     "feature_Wr_identity_plus_ortho",
-    #     "feature_weight_norm",
-    #     "feature_recurrence_rectified_identity_perturbed",
-    # ]
-
+    # List of branches to generate scripts for
     branch_list = [
+        "feature_constrained_matrices_Wr_identity_perturbed",
+        "feature_constrained_matrices",
         "feature_diagonal_recurrence",
-        "feature_recurrence_rectified",
-        "feature_recurrence_rectified_identity_perturbed",
+        "main",
+        "test"
     ]
-    additional_name = "rectified_model"
-    # additional_name = "rectified_model_fixed_tau"
+
+    additional_name = "unrectified_model"
 
     for branch_name in branch_list:
         # Set append_name to branch_name, replacing slashes with underscores
@@ -127,7 +119,6 @@ if __name__ == "__main__":
         model_params = {
             "MODEL_NAME": MODEL_NAME,
             "FOLDER_NAME": FOLDER_NAME,
-            "DATA_DIR": "/home/sr6364/python_scripts/dynamic-divisive-norm/data/mnist",
             "PERMUTED": PERMUTED,
             "CHECKPOINT": CHECKPOINT,
             "VERSION": 0,
@@ -137,7 +128,7 @@ if __name__ == "__main__":
             "dt_tau_max_b": dt_tau_max_b,
             "learn_tau": "True",
             "HIDDEN_SIZE": HIDDEN_SIZE,
-            "NUM_EPOCHS": 300,
+            "NUM_EPOCHS": 500,
             "LEARNING_RATE": LEARNING_RATE,
             "SCHEDULER_CHANGE_STEP": 50,
             "SCHEDULER_GAMMA": 0.8

@@ -26,7 +26,7 @@ SCHEDULER_GAMMA = 0.7
 CHECKPOINT_EVERY_N_EPOCH = 1
 
 # Dataset
-DATA_DIR = "../../data/mnist"
+DATA_DIR = "/home/sr6364/python_scripts/dynamic-divisive-norm/data/mnist"
 NUM_WORKERS = 2
 
 # Compute related

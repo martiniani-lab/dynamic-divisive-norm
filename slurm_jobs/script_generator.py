@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     # Define model parameters
     HIDDEN_SIZE = 128
-    PERMUTED = True
+    PERMUTED = False
     CHECKPOINT = False
     dt_tau_max_y = 0.05
     dt_tau_max_a = 0.01

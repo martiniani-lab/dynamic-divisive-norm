@@ -52,7 +52,7 @@ class rnnCell(nn.Module):
 
         # Define the normalization matrix
         self.log_Way = nn.Parameter(torch.zeros((hidden_size, hidden_size)))
-        self.sparsity = 0.5
+        self.sparsity = 0.0
 
         self.initilize_weights()
 

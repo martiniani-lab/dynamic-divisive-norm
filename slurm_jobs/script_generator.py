@@ -1,3 +1,5 @@
+
+
 import os
 
 def generate_slurm_script(slurm_params, model_params, branch_name=None):
@@ -56,7 +58,7 @@ if __name__ == "__main__":
     # Define SLURM parameters
     slurm_params = {
         "nodes": 1,
-        "time": "24:00:00",
+        "time": "18:00:00",
         "ntasks_per_node": 1,
         "cpus_per_task": 8,
         "job_name": "sMNIST",
@@ -79,27 +81,24 @@ if __name__ == "__main__":
     dt_tau_max_y = 0.05
     dt_tau_max_a = 0.01
     dt_tau_max_b = 0.1
-    LEARNING_RATE = 0.005
+    LEARNING_RATE = 0.01
 
     # List of branches to generate scripts for
     branch_list = [
-        "feature_constrained_matrices_Wr_identity_perturbed",
-        "feature_constrained_matrices",
-        "feature_diagonal_recurrence",
-        "test"
+        "fixed_tau",
+        "feature_model_variation1",
+        "feature_model_variation2"
     ]
-    # additional_name = "fixed_tau"
-    additional_name = "unrectified"
 
     for branch_name in branch_list:
         # Set append_name to branch_name, replacing slashes with underscores
-        append_name = branch_name
+        append_name = branch_name.replace('/', '_')
 
         if PERMUTED:
-            MODEL_NAME = f"psMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{additional_name}"
+            MODEL_NAME = f"psMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{append_name}"
             FOLDER_NAME = f"/vast/sr6364/dynamic-divisive-norm/tb_logs/{append_name}/psMNIST"
         else:
-            MODEL_NAME = f"sMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{additional_name}"
+            MODEL_NAME = f"sMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{append_name}"
             FOLDER_NAME = f"/vast/sr6364/dynamic-divisive-norm/tb_logs/{append_name}/sMNIST"
 
         model_params = {
@@ -112,9 +111,9 @@ if __name__ == "__main__":
             "dt_tau_max_y": dt_tau_max_y,
             "dt_tau_max_a": dt_tau_max_a,
             "dt_tau_max_b": dt_tau_max_b,
-            "learn_tau": "True",
+            "learn_tau": "False",
             "HIDDEN_SIZE": HIDDEN_SIZE,
-            "NUM_EPOCHS": 500,
+            "NUM_EPOCHS": 300,
             "LEARNING_RATE": LEARNING_RATE,
             "SCHEDULER_CHANGE_STEP": 50,
             "SCHEDULER_GAMMA": 0.8

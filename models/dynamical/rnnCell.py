@@ -52,7 +52,7 @@ class rnnCell(nn.Module):
 
         # Define the normalization matrix
         self.log_Way = nn.Parameter(torch.zeros((hidden_size, hidden_size)))
-        self.sparsity = 0.5
+        self.sparsity = 0.0
 
         # initize the weight matrices
         self.initilize_weights()
@@ -185,8 +185,8 @@ class rnnCell(nn.Module):
         x: (batch_size, input_size)
         hidden: (batch_size, hidden_size)
         """
-        z = F.relu(F.linear(x, self.Wzx(), bias=None))
-        # z = F.linear(x, self.Wzx(), bias=None)
+        # z = F.relu(F.linear(x, self.Wzx(), bias=None))
+        z = F.linear(x, self.Wzx(), bias=None)
 
         # Scale the norm of z
         # norm_z = torch.norm(z, dim=1, keepdim=True) + 1e-5

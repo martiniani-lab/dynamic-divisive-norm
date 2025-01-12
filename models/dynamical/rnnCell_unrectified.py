@@ -33,13 +33,13 @@ class rnnCell_unrectified(nn.Module):
             nn.Parameter(torch.randn((hidden_size, input_size)), requires_grad=True)
         )
         # parametrize the spectral norm of the input drive to be maximum of 1
-        # torch.nn.utils.parametrizations.spectral_norm(self.Wzx, name="weight")
+        torch.nn.utils.parametrizations.spectral_norm(self.Wzx, name="weight")
 
         self.Wr = utils.Identity(
             nn.Parameter(torch.eye(hidden_size), requires_grad=not Wr_identity)
         )
         # parameterize Wr to have a max singular value of 1
-        # torch.nn.utils.parametrizations.spectral_norm(self.Wr, name="weight")
+        torch.nn.utils.parametrizations.spectral_norm(self.Wr, name="weight")
         
         # Define the weight matrices for the gains
         self.Wbx0 = nn.Parameter(torch.randn((hidden_size, input_size)), requires_grad=True)

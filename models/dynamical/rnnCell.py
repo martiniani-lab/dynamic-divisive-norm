@@ -52,8 +52,8 @@ class rnnCell(nn.Module):
 
         # Define the normalization matrix
         self.log_Way = nn.Parameter(torch.zeros((hidden_size, hidden_size)))
+        self.sparsity = 0.0
 
-        # Initialize the weights
         self.initilize_weights()
 
         # Define the semi-saturation constant
@@ -114,7 +114,7 @@ class rnnCell(nn.Module):
         nn.init.kaiming_uniform_(self.Wzx(), a=math.sqrt(5))
         # make the spectral norm of Wzx() to be 1
         spectral_norm = torch.svd(self.Wzx()).S[0].item()
-        # print(spectral_norm)
+        # # print(spectral_norm)
         self.Wzx.weight.data = self.Wzx.weight.data / spectral_norm
         # spectral_norm = torch.svd(self.Wzx()).S[0].item()
         # print(spectral_norm)
@@ -134,14 +134,18 @@ class rnnCell(nn.Module):
         nn.init.kaiming_uniform_(self.Wby1, a=math.sqrt(5))
         nn.init.kaiming_uniform_(self.Wba1, a=math.sqrt(5))
 
-        # initialize the normalization matrix
-        self.log_Way.data.uniform_(-1.0, 0.0)
+        # initialize the Way matrix
+        mask = torch.rand((self.hidden_size, self.hidden_size)) > self.sparsity
+        uniform_values = torch.empty((self.hidden_size, self.hidden_size)).uniform_(0.0, 1.0)
+        sparse_values = uniform_values * mask.float()
+        log_sparse_values = torch.log(torch.clamp(sparse_values, min=1e-8))
+        self.log_Way.data.copy_(log_sparse_values)
         self.log_Way.data.fill_diagonal_(0.0)
         return
 
     def Way(self):
-        # return torch.clamp(self.log_Way.exp(), min=0.0, max=1.0)
-        return self.log_Way.exp()
+        return torch.clamp(self.log_Way.exp(), min=0.0, max=1.0)
+        # return self.log_Way.exp()
 
     def B0(self, x, y, a):
         return torch.sigmoid(F.linear(x, self.Wbx0, bias=None) + F.linear(y, self.Wby0, bias=None) + F.linear(a, self.Wba0, bias=None))
@@ -181,6 +185,8 @@ class rnnCell(nn.Module):
         hidden: (batch_size, hidden_size)
         """
         z = F.relu(F.linear(x, self.Wzx(), bias=None))
+        # z = F.linear(x, self.Wzx(), bias=None)
+
         # Scale the norm of z
         # norm_z = torch.norm(z, dim=1, keepdim=True) + 1e-5
         # z = (z / norm_z) * (torch.norm(x, dim=1, keepdim=True) / math.sqrt(self.input_size))
@@ -191,6 +197,7 @@ class rnnCell(nn.Module):
         # Wr = torch.eye(self.hidden_size, device=self.Wr.weight.device) + self.Wr()
         Wr = self.Wr()
 
+        # y_hat = F.linear(F.relu(y), Wr, bias=None)
         y_hat = F.relu(F.linear(y, Wr, bias=None))
 
         B0 = self.B0(x, y, a)

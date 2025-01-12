@@ -86,8 +86,8 @@ if __name__ == "__main__":
     }
 
     # Define model parameters
-    HIDDEN_SIZE = 128
-    PERMUTED = False
+    HIDDEN_SIZE = 64
+    PERMUTED = True
     CHECKPOINT = False
     dt_tau_max_y = 0.05
     dt_tau_max_a = 0.01
@@ -103,7 +103,7 @@ if __name__ == "__main__":
         "test"
     ]
 
-    additional_name = "unrectified_model"
+    additional_name = "rectified_model_final"
 
     for branch_name in branch_list:
         # Set append_name to branch_name, replacing slashes with underscores

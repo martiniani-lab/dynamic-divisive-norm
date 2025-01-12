@@ -21,13 +21,26 @@ def generate_slurm_script(slurm_params, model_params, branch_name=None):
     else:
         script_content += f'\nBRANCH_NAME=main\n'  # Default to 'main' if not specified
 
+    # Add commands to clone the repository into a unique working directory
     script_content += f'''
+# Create a unique working directory for this job
+WORK_DIR="/scratch/sr6364/jobs/job_$SLURM_JOB_ID"
+mkdir -p "$WORK_DIR"
+
+# Clone the repository into the working directory
+git clone {slurm_params['repo_dir']} "$WORK_DIR/dynamic-divisive-norm"
+
+# Navigate to the cloned repository
+cd "$WORK_DIR/dynamic-divisive-norm"
+
+# Check out the desired branch and reset to match the remote branch
+git fetch origin
+git checkout $BRANCH_NAME
+git reset --hard origin/$BRANCH_NAME
+
+# Execute the training script
 singularity exec --nv --overlay {slurm_params['singularity_overlay']}:ro {slurm_params['singularity_image']} /bin/bash -c "
 source /ext3/env.sh; conda activate {slurm_params['conda_env']}; \
-cd {slurm_params['repo_dir']}; \
-git fetch origin; \
-git checkout $BRANCH_NAME; \
-git pull; \
 cd {slurm_params['script_subdir']}; \
 python {slurm_params['script_name']}.py \
 '''
@@ -56,7 +69,7 @@ if __name__ == "__main__":
     # Define SLURM parameters
     slurm_params = {
         "nodes": 1,
-        "time": "18:00:00",
+        "time": "24:00:00",
         "ntasks_per_node": 1,
         "cpus_per_task": 8,
         "job_name": "sMNIST",
@@ -79,24 +92,28 @@ if __name__ == "__main__":
     dt_tau_max_y = 0.05
     dt_tau_max_a = 0.01
     dt_tau_max_b = 0.1
-    LEARNING_RATE = 0.01
+    LEARNING_RATE = 0.005
 
     # List of branches to generate scripts for
     branch_list = [
-        "fixed_tau",
-        "feature_model_variation1",
-        "feature_model_variation2"
+        "feature_constrained_matrices_Wr_identity_perturbed",
+        "feature_constrained_matrices",
+        "feature_diagonal_recurrence",
+        "main",
+        "test"
     ]
+
+    additional_name = "unrectified_model"
 
     for branch_name in branch_list:
         # Set append_name to branch_name, replacing slashes with underscores
-        append_name = branch_name.replace('/', '_')
+        append_name = branch_name.replace("/", "_")
 
         if PERMUTED:
-            MODEL_NAME = f"psMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{append_name}"
+            MODEL_NAME = f"psMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{additional_name}"
             FOLDER_NAME = f"/vast/sr6364/dynamic-divisive-norm/tb_logs/{append_name}/psMNIST"
         else:
-            MODEL_NAME = f"sMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{append_name}"
+            MODEL_NAME = f"sMNIST_{HIDDEN_SIZE}_{dt_tau_max_y}_{dt_tau_max_a}_{dt_tau_max_b}_lr_{LEARNING_RATE}_{additional_name}"
             FOLDER_NAME = f"/vast/sr6364/dynamic-divisive-norm/tb_logs/{append_name}/sMNIST"
 
         model_params = {
@@ -109,9 +126,9 @@ if __name__ == "__main__":
             "dt_tau_max_y": dt_tau_max_y,
             "dt_tau_max_a": dt_tau_max_a,
             "dt_tau_max_b": dt_tau_max_b,
-            "learn_tau": "False",
+            "learn_tau": "True",
             "HIDDEN_SIZE": HIDDEN_SIZE,
-            "NUM_EPOCHS": 300,
+            "NUM_EPOCHS": 500,
             "LEARNING_RATE": LEARNING_RATE,
             "SCHEDULER_CHANGE_STEP": 50,
             "SCHEDULER_GAMMA": 0.8
@@ -122,14 +139,14 @@ if __name__ == "__main__":
         script_content = generate_slurm_script(slurm_params, model_params, branch_name=branch_name)
         if PERMUTED:
             # Replace slashes with underscores for directory names
-            directory = f'psMNIST_{HIDDEN_SIZE}_{append_name}'
+            directory = f'psMNIST_{HIDDEN_SIZE}/{append_name}'
             if not os.path.exists(directory):
                 os.makedirs(directory)
             # Use the MODEL_NAME as the script file name
             file_path = os.path.join(directory, f'{MODEL_NAME}.sh')
             save_script(script_content, file_path)
         else:
-            directory = f'sMNIST_{HIDDEN_SIZE}_{append_name}'
+            directory = f'sMNIST_{HIDDEN_SIZE}/{append_name}'
             if not os.path.exists(directory):
                 os.makedirs(directory)
             file_path = os.path.join(directory, f'{MODEL_NAME}.sh')

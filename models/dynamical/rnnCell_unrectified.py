@@ -178,8 +178,8 @@ class rnnCell_unrectified(nn.Module):
         x: (batch_size, input_size)
         hidden: (batch_size, hidden_size)
         """
-        # z = F.relu(F.linear(x, self.Wzx(), bias=None))
-        z = F.linear(x, self.Wzx(), bias=None)
+        z = F.relu(F.linear(x, self.Wzx(), bias=None))
+        # z = F.linear(x, self.Wzx(), bias=None)
 
         # Scale the norm of z
         # norm_z = torch.norm(z, dim=1, keepdim=True) + 1e-5

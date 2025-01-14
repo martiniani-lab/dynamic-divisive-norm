@@ -103,7 +103,8 @@ if __name__ == "__main__":
         "test"
     ]
 
-    additional_name = "rectified_model_final"
+    # additional_name = "rectified_model_final"
+    additional_name = "unrectified_model_final"
 
     for branch_name in branch_list:
         # Set append_name to branch_name, replacing slashes with underscores

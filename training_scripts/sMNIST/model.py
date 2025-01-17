@@ -19,8 +19,8 @@ class rnn(pl.LightningModule):
         self.lr = learning_rate
         self.scs = scheduler_change_step
         self.gamma = scheduler_gamma
-        # self.org = organics.rnnCell(input_size=input_size, hidden_size=hidden_size, **kwargs_dict)
-        self.org = organics.rnnCell_unrectified(input_size=input_size, hidden_size=hidden_size, **kwargs_dict)
+        self.org = organics.rnnCell(input_size=input_size, hidden_size=hidden_size, **kwargs_dict)
+        # self.org = organics.rnnCell_unrectified(input_size=input_size, hidden_size=hidden_size, **kwargs_dict)
 
         self.fc = nn.Linear(hidden_size, num_classes)
         # Initial hidden states for y and a neurons

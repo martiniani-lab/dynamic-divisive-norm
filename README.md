@@ -106,7 +106,7 @@ Code to generate all the figures in the paper can be found at,
 > 
 > Shivang Rawat, David J. Heeger and Stefano Martiniani
 >
-> https://arxiv.org/abs/2409.18946
+> https://proceedings.neurips.cc/paper_files/paper/2024/file/1abed6ee581b9ceb4e2ddf37822c7fcb-Paper-Conference.pdf
 
 ```bibtex
 @article{rawat2025unconditional,

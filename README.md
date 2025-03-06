@@ -109,10 +109,12 @@ Code to generate all the figures in the paper can be found at,
 > https://arxiv.org/abs/2409.18946
 
 ```bibtex
-@article{rawat2024unconditional,
+@article{rawat2025unconditional,
   title={Unconditional stability of a recurrent neural circuit implementing divisive normalization},
-  author={Rawat, Shivang and Heeger, David J and Martiniani, Stefano},
-  journal={arXiv preprint arXiv:2409.18946},
-  year={2024}
+  author={Rawat, Shivang and Heeger, David and Martiniani, Stefano},
+  journal={Advances in Neural Information Processing Systems},
+  volume={37},
+  pages={14712--14750},
+  year={2025}
 }
 ```
